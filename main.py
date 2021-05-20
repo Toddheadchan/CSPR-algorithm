@@ -134,7 +134,10 @@ class CSPR:
 
 		playerList = sorted(playerList, key=lambda player: player["rating"], reverse=True)
 
-		updateCSPRDB(playerList, self.season)
+		playerList = sorted(playerList, key=lambda player: player["rating"], reverse=True)
+		for player in playerList:
+			print (player["name"], "       ", player["rating"])
+		#updateCSPRDB(playerList, self.season)
 
 
 	def runCSPR(self):
