@@ -4,7 +4,7 @@ import datetime
 
 # 获取数据库连接
 def getDB():
-	db = pymysql.connect(host='112.74.17.146', port=8036, user='root', password='GZ_smash8', database='cspr')
+	db = pymysql.connect(host='112.74.17.146', port=8036, user='root', password='GZ_smash8', database='cspr_dev')
 	cursor = db.cursor()
 
 	return db, cursor
