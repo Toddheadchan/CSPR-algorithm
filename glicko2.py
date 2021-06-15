@@ -51,7 +51,7 @@ class Player:
 
     rd = property(getRd, setRd)
      
-    def __init__(self, rating = 1500, rd = 50, vol = 0.06):
+    def __init__(self, rating = 1500, rd = 30, vol = 0.06):
         # For testing purposes, preload the values
         # assigned to an unrated player.
         self.setRating(rating)
@@ -217,7 +217,7 @@ class Player:
             rd = self.rdList[index]
             outcome = self.outcomeList[index]
             self.update_player([rating], [rd], [outcome])
-            print (rating, rd, outcome, self.getRating())
+            #print (rating, rd, outcome, self.getRating())
         # self.update_player(self.ratingList, self.rdList, self.outcomeList)
         newRating = self.getRating()
         newRd = self.getRd()
