@@ -64,8 +64,8 @@ class CSPR:
 				continue
 			rankingRate = self.a / self.getLevelRanking(standing) + max(0, self.b * (avgPlayerCount - standing) / 2 / avgPlayerCount)
 			self.getPlayer(player["id"]).bonusRating(tournamentBonus * bonusRate * rankingRate - self.getPlayer(player["id"]).getPlayerWeight())
-			if (player["gamerTag"] == "eric42"):
-				print (player["gamerTag"], ' BONUS: ', tournamentBonus * bonusRate * rankingRate - self.getPlayer(player["id"]).getPlayerWeight())
+			#if (player["gamerTag"] == "eric42"):
+				#print (player["gamerTag"], ' BONUS: ', tournamentBonus * bonusRate * rankingRate - self.getPlayer(player["id"]).getPlayerWeight())
 
 	def setsAdapt(self, setInfo):
 		winnerId = setInfo["winner_id"]
@@ -107,9 +107,13 @@ class CSPR:
 			
 	def updatePlayer(self, playerList):
 		totalPlayer = self.tournament.getTotalPlayer()
+		bonusRate = math.log(totalPlayer, 8) ** 0.5
 		for player in playerList:
-			print(player["gamerTag"])
-			self.getPlayer(player["id"]).myUpdate(player["standing"], totalPlayer, self.tournament.getTournamentId())
+			#print(player["gamerTag"])
+			currentPlayer = self.getPlayer(player["id"])
+			currentPlayer.setRd(currentPlayer.getRd() * bonusRate)
+			currentPlayer.myUpdate(player["standing"], totalPlayer, self.tournament.getTournamentId())
+			currentPlayer.setRd(currentPlayer.getRd() / bonusRate)
 
 	def runTournament(self, tournamentId):
 		self.participant = {}
@@ -122,7 +126,7 @@ class CSPR:
 	def printCSPR(self):
 		playerList = []
 		for playerId in self.playerDictionary:
-			player = self.playerDictionary[playerId] 
+			player = self.playerDictionary[playerId]
 			if not player.getIsRanked(): continue
 			playerList.append({
 				"name": player.getName(),
@@ -132,11 +136,11 @@ class CSPR:
 				"log": player.getLog()
 			})
 
-		playerList = sorted(playerList, key=lambda player: player["rating"], reverse=True)
-
+		i = 1
 		playerList = sorted(playerList, key=lambda player: player["rating"], reverse=True)
 		for player in playerList:
-			print (player["name"], "       ", player["rating"])
+			print(i, " ", player["name"], "       ", round(player["rating"], 2), "     ", player["RD"])
+			i = i + 1
 		#updateCSPRDB(playerList, self.season)
 
 
@@ -144,7 +148,33 @@ class CSPR:
 		for tournament in self.tournamentList:
 			self.tournamentId = tournament["tournamentId"]
 			self.runTournament(tournament["tournamentId"])
-		self.printCSPR()
+		#self.printCSPR()
+
+	def ratingInherit(self):
+		count = 0
+		highest = 1.0
+		coe = 1.0
+		for playerId in self.playerDictionary:
+			player = self.playerDictionary[playerId]
+			if not player.getIsRanked(): continue
+			count += 1
+			value = player.getPlayerWeight()
+			if value > highest:
+				highest = value
+
+		if 1.0 < highest < 4.0:
+			coe = 15.0
+		elif highest > 4.0:
+			coe = (highest - 1.0) / 0.2
+
+		for playerId in self.playerDictionary:
+			player = self.playerDictionary[playerId]
+			value = player.getPlayerWeight()
+			if len(player.getLog()) != 0:
+				newValue = 1.0 + (value - 1.0) / coe
+				newRating = 1500 + 173.7178 * math.log2(newValue)
+				player.setRating(newRating)
+				player.setRd(30.0)
 
 	def __init__(self, season):
 		self.playerDictionary = {}
@@ -154,3 +184,6 @@ class CSPR:
 if __name__ == "__main__":
 	CSPR0 = CSPR(1)
 	CSPR0.runCSPR()
+	CSPR0.ratingInherit()
+	#CSPR0.runCSPR()
+	CSPR0.printCSPR()
