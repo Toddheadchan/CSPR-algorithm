@@ -151,15 +151,30 @@ class CSPR:
 		#self.printCSPR()
 
 	def ratingInherit(self):
+		count = 0
+		highest = 1.0
+		coe = 1.0
+		for playerId in self.playerDictionary:
+			player = self.playerDictionary[playerId]
+			if not player.getIsRanked(): continue
+			count += 1
+			value = player.getPlayerWeight()
+			if value > highest:
+				highest = value
+
+		if 1.0 < highest < 4.0:
+			coe = 15.0
+		elif highest > 4.0:
+			coe = (highest - 1.0) / 0.2
+
 		for playerId in self.playerDictionary:
 			player = self.playerDictionary[playerId]
 			value = player.getPlayerWeight()
 			if len(player.getLog()) != 0:
-				avgGrow = (value - 1) / len((player.getLog()))
-				newValue = 1 + value * avgGrow / 6
+				newValue = 1.0 + (value - 1.0) / coe
 				newRating = 1500 + 173.7178 * math.log2(newValue)
 				player.setRating(newRating)
-				player.setRd(30)
+				player.setRd(30.0)
 
 	def __init__(self, season):
 		self.playerDictionary = {}
@@ -169,6 +184,6 @@ class CSPR:
 if __name__ == "__main__":
 	CSPR0 = CSPR(1)
 	CSPR0.runCSPR()
-	#CSPR0.ratingInherit()
+	CSPR0.ratingInherit()
 	#CSPR0.runCSPR()
 	CSPR0.printCSPR()
